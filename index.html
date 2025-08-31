@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<link href="https://fonts.googleapis.com/css2?family=Fondamento:ital@0;1&family=Nosifer&family=Orbitron:wght@400..900&display=swap" rel="stylesheet">
+  <meta charset="UTF-8">
+    <title>Summ.AI - PDF/Image Summarizer</title>
+    <style>
+       body {
+            background: url("https://img.freepik.com/free-vector/pastel-ombre-background-pink-purple_53876-120750.jpg") no-repeat center center fixed;
+            background-size: cover;
+            font-family: "Times New Roman", Times, serif;
+            color: #222;
+            max-width: 700px;
+            margin: 80px auto 50px auto;
+            padding: 20px;
+            position: relative;
+        }
+
+        /* Logo pinned at webpage corner */
+        .logo {
+            position: fixed;
+            top: 15px;
+            left: 20px;
+            font-size: 24px;
+            font-weight: bold;
+            text-shadow:
+        1px 1px 3px rgba(0, 0, 0, 0.6),   /* little black shadow */
+        0 0 6px rgba(255, 255, 255, 0.6);
+            color: #000;
+          font-family: "Orbitron", sans-serif;
+
+<!--            background: rgba(255, 255, 255, 0.8);-->
+            padding: 6px 14px;
+            border-radius: 8px;
+<!--            box-shadow: 0 2px 6px ;-->
+            z-index: 1000; /* stays above everything */
+        }
+
+        h2 {
+            text-align: center;
+            color: #000;
+            text-shadow: 1px 1px 3px rgba(255, 255, 255, 0.7);
+            font-size: 35px;
+            text-shadow:
+        1px 1px 3px rgba(0, 0, 0, 0.4),   /* little black shadow */
+        0 0 6px rgba(255, 255, 255, 0.6);
+        }
+
+        .upload-area {
+    border: 2px dashed #555;
+    padding: 40px;
+    text-align: center;
+    cursor: pointer;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.45);  /* lighter translucency */
+    backdrop-filter: blur(6px);
+    margin-bottom: 20px;
+    transition: border-color 0.3s;
+    color: #222;
+    font-weight: 500;
+}
+
+        .upload-area.hover {
+            border-color: #007BFF;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        #preview {
+            margin-top: 20px;
+            text-align: center;
+            color: #111;
+        }
+
+        #preview img {
+            max-width: 300px;
+            max-height: 300px;
+            margin-bottom: 10px;
+            border-radius: 10px;
+        }
+
+        .btn-container {
+            text-align: left;
+            margin: 20px 0;
+        }
+
+        button {
+            padding: 14px 30px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            background-color: #007BFF;
+            color: #fff;
+            border-radius: 8px;
+            font-weight: bold;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #summary {
+    margin-top: 20px;
+    padding: 20px;
+    border-radius: 10px;
+    min-height: 100px;
+    white-space: pre-wrap;
+    background: rgba(255, 255, 255, 0.45);  /* lighter translucency */
+    backdrop-filter: blur(10px);
+    box-shadow: 0 0 8px rgba(0,0,0,0.3);
+    color: #111;
+    font-size: 15px;
+    line-height: 1.5;
+}
+
+        .spinner {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #007BFF;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg);}
+            100% { transform: rotate(360deg);}
+        }
+    </style>
+</head>
+<body>
+
+<!-- Logo fixed at page corner -->
+<div class="logo">Summ.AI</div>
+
+<h2>PDF / Image Summarizer</h2>
+
+<div class="upload-area" id="uploadArea">
+    Drag & Drop a file here or click to select
+</div>
+<input type="file" id="fileInput" />
+
+<div id="preview"></div>
+
+<div class="btn-container">
+    <button onclick="uploadFile()">Upload & Summarize</button>
+</div>
+
+<div id="summary"></div>
+
+<script>
+const uploadArea = document.getElementById('uploadArea');
+const fileInput = document.getElementById('fileInput');
+let selectedFile = null;
+
+uploadArea.addEventListener('click', () => fileInput.click());
+
+uploadArea.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    uploadArea.classList.add('hover');
+});
+uploadArea.addEventListener('dragleave', () => {
+    uploadArea.classList.remove('hover');
+});
+uploadArea.addEventListener('drop', (e) => {
+    e.preventDefault();
+    uploadArea.classList.remove('hover');
+    selectedFile = e.dataTransfer.files[0];
+    showPreview(selectedFile);
+});
+
+fileInput.addEventListener('change', (e) => {
+    selectedFile = e.target.files[0];
+    showPreview(selectedFile);
+});
+
+function showPreview(file) {
+    const previewDiv = document.getElementById('preview');
+    previewDiv.innerHTML = '';
+    if (!file) return;
+
+    if (file.type.startsWith('image/')) {
+        const img = document.createElement('img');
+        img.src = URL.createObjectURL(file);
+        previewDiv.appendChild(img);
+    } else if (file.type === 'application/pdf') {
+        previewDiv.innerHTML = '<p>PDF selected: ' + file.name + '</p>';
+    }
+}
+
+function typeWriter(text, element, speed = 30) {
+    let i = 0;
+    element.innerHTML = "";
+    function typing() {
+        if (i < text.length) {
+            element.innerHTML += text.charAt(i);
+            i++;
+            setTimeout(typing, speed);
+        }
+    }
+    typing();
+}
+
+async function uploadFile() {
+    if (!selectedFile) {
+        alert("Please select a file.");
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('file', selectedFile);
+
+    const summaryDiv = document.getElementById('summary');
+    summaryDiv.innerHTML = '<div class="spinner"></div>';
+
+    try {
+        const response = await fetch('/upload', {
+            method: 'POST',
+            body: formData
+        });
+        const result = await response.json();
+
+        if (result.success) {
+            typeWriter(result.summary, summaryDiv, 25);
+        } else {
+            typeWriter("Error: " + result.error, summaryDiv, 25);
+        }
+    } catch (err) {
+        typeWriter("Error: " + err, summaryDiv, 25);
+    }
+}
+</script>
+
+</body>
+</html>
